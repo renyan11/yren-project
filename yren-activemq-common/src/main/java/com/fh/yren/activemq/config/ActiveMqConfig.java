@@ -1,6 +1,6 @@
-package com.fh.yren.activemq.provider.config;
+package com.fh.yren.activemq.config;
 
-import com.fh.yren.activemq.provider.util.ActiveMQUtil;
+import com.fh.yren.activemq.util.ActiveMQUtil;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

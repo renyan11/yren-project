@@ -1,6 +1,6 @@
 package com.fh.yren.activemq.provider.controller;
 
-import com.fh.yren.activemq.provider.util.ActiveMQUtil;
+import com.fh.yren.activemq.util.ActiveMQUtil;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +24,7 @@ public class ActiveMqProviderController {
             connection = connectFactory.createConnection();
             connection.start();
             session = connection.createSession(true, Session.SESSION_TRANSACTED);
-            Queue queue = session.createQueue("ren-yan-20200211");
+            Queue queue = session.createQueue("ren-yan-20200212");
             ActiveMQMapMessage activeMQMapMessage = new ActiveMQMapMessage();
             activeMQMapMessage.setString("username","ren-yan");
             activeMQMapMessage.setInt("age",28);

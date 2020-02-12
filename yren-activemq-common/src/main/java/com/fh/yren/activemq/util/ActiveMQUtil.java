@@ -1,10 +1,8 @@
-package com.fh.yren.activemq.provider.util;
+package com.fh.yren.activemq.util;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
-
 import javax.jms.ConnectionFactory;
-
 
 public class ActiveMQUtil {
 
