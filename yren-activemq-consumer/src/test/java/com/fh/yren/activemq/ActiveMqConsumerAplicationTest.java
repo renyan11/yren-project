@@ -21,51 +21,147 @@ public class ActiveMqConsumerAplicationTest {
 
     public static void main(String[] args) {
         ActiveMqConsumerAplicationTest aplicationTest = new ActiveMqConsumerAplicationTest();
-        aplicationTest.consumerTest1();
-        aplicationTest.consumerTest2();
+        //队列消费者们
+        //aplicationTest.consumerQueueTest1();
+        //aplicationTest.consumerQueueTest2();
+        //主题消费者们
+        //aplicationTest.consumerTopicTest1();
+        aplicationTest.consumerTopicTest2();
+
     }
 
     @Test
-    public void consumerTest1() {
+    public void consumerQueueTest1() {
         try {
             connection = connectFactory.createConnection();
             connection.start();
-            session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue queue = session.createQueue("ren-yan-queue-test");
             consumer = session.createConsumer(queue);
             consumer.setMessageListener((message -> {
                 TextMessage textMessage = (TextMessage) message;
                 try {
-                    log.info("我是消费者1,接收到消息 = " + textMessage.getText());
+                    log.info("我是队列消费者1,接收到消息 = " + textMessage.getText());
                 } catch (JMSException e) {
                     e.printStackTrace();
                 }
             }));
+            System.in.read();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void consumerTest2() {
+    public void consumerQueueTest2() {
         try {
             connection = connectFactory.createConnection();
             connection.start();
-            session = connection.createSession(true, Session.SESSION_TRANSACTED);
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue queue = session.createQueue("ren-yan-queue-test");
             consumer = session.createConsumer(queue);
             consumer.setMessageListener((message -> {
                 TextMessage textMessage = (TextMessage) message;
                 try {
-                    log.info("我是消费者2,接收到消息 = " + textMessage.getText());
+                    log.info("我是队列消费者2,接收到消息 = " + textMessage.getText());
                 } catch (JMSException e) {
                     e.printStackTrace();
                 }
             }));
+            System.in.read();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
 
+        }
+    }
+
+
+    @Test
+    public void consumerTopicTest1() {
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic1 = session.createTopic("ren-yan-topic-test");
+            consumer = session.createConsumer(topic1);
+            consumer.setMessageListener((message -> {
+                TextMessage textMessage = (TextMessage) message;
+                try {
+                    log.info("我是主题消费者1,接收到消息 = " + textMessage.getText());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }));
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void consumerTopicTest2() {
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic2 = session.createTopic("ren-yan-topic-test");
+            consumer = session.createConsumer(topic2);
+            consumer.setMessageListener((message -> {
+                TextMessage textMessage = (TextMessage) message;
+                try {
+                    log.info("我是主题消费者2,接收到消息 = " + textMessage.getText());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }));
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

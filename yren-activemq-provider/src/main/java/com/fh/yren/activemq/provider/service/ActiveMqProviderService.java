@@ -23,11 +23,11 @@ public class ActiveMqProviderService {
             connection = connectFactory.createConnection();
             connection.start();
             session = connection.createSession(true, Session.SESSION_TRANSACTED);
-            Queue queue = session.createQueue("ren-yan-20200211");
+            Queue queue = session.createQueue("ren-yan-20200212");
             ActiveMQMapMessage activeMQMapMessage = new ActiveMQMapMessage();
             activeMQMapMessage.setString("username", "ren-yan-123");
-            activeMQMapMessage.setInt("age", 20);
-            activeMQMapMessage.setString("gender", "female");
+            activeMQMapMessage.setInt("age", 28);
+            activeMQMapMessage.setString("gender", "male");
             producer = session.createProducer(queue);
             producer.send(activeMQMapMessage);
             session.commit();
