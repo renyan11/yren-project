@@ -28,7 +28,8 @@ public class ActiveMqConsumerAplicationTest {
         //aplicationTest.consumerTopicTest1();
         //aplicationTest.consumerTopicTest2();
         //主题消费者们(持久化)
-        aplicationTest.consumerTopicPersistent();
+        //aplicationTest.consumerTopicPersistent();
+        aplicationTest.testConsumerRunning();
 
     }
 
@@ -51,6 +52,28 @@ public class ActiveMqConsumerAplicationTest {
             System.in.read();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -74,7 +97,27 @@ public class ActiveMqConsumerAplicationTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -216,4 +259,46 @@ public class ActiveMqConsumerAplicationTest {
         }
     }
 
+    public void testConsumerRunning() {
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic1 = session.createTopic("ren-yan-topic-test-20200214-one");
+            consumer = session.createConsumer(topic1);
+            consumer.setMessageListener((message -> {
+                TextMessage textMessage = (TextMessage) message;
+                try {
+                    log.info("我是主题消费者,中途启动，接收到消息 = " + textMessage.getText());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }));
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

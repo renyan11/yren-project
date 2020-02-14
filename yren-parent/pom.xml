@@ -20,6 +20,7 @@
         <activemq.pool>5.15.0</activemq.pool>
         <lombok.version>1.18.8</lombok.version>
         <junit.version>4.12</junit.version>
+        <jackson.databind.version>2.9.9</jackson.databind.version>
     </properties>
 
     <dependencies>
@@ -82,6 +83,13 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.databind.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

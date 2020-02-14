@@ -1,5 +1,6 @@
 package com.fh.yren.activemq;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +10,7 @@ import javax.jms.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Slf4j
 public class ActiveMqProviderAplicationTest {
 
 
@@ -19,7 +21,8 @@ public class ActiveMqProviderAplicationTest {
         //主题消息生产(非持久)
         //aplicationTest.TopicProvider();
         //主题消息生产(持久化)
-        aplicationTest.TopicProviderPersistent();
+        //aplicationTest.TopicProviderPersistent();
+        aplicationTest.testTopicRunning();
     }
 
     /**
@@ -44,8 +47,14 @@ public class ActiveMqProviderAplicationTest {
                 TextMessage textMessage = session.createTextMessage("test队列消息" + i);
                 producer.send(textMessage);
             }
+            //事务为true,必须要commit();false是自动提交
             session.commit();
         } catch (Exception e) {
+            try {
+                session.rollback();
+            } catch (JMSException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         } finally {
             if (producer != null) {
@@ -75,7 +84,7 @@ public class ActiveMqProviderAplicationTest {
     /**
      * Topic Provider 主题 生产者 --- 非持久化
      */
-    public void TopicProvider(){
+    public void TopicProvider() throws JMSException {
         ConnectionFactory connectFactory = new ActiveMQConnectionFactory("tcp://101.133.232.101:61616");
         Connection connection = null;
         Session session = null;
@@ -93,6 +102,7 @@ public class ActiveMqProviderAplicationTest {
             }
             session.commit();
         } catch (Exception e) {
+            session.rollback();
             e.printStackTrace();
         } finally {
             if (producer != null) {
@@ -142,6 +152,65 @@ public class ActiveMqProviderAplicationTest {
             }
             session.commit();
         } catch (Exception e) {
+            try {
+                session.rollback();
+            } catch (JMSException e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static int time = 0;
+
+    public void testTopicRunning(){
+        ConnectionFactory connectFactory = new ActiveMQConnectionFactory("tcp://101.133.232.101:61616");
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic("ren-yan-topic-test-20200214-one");
+            producer = session.createProducer(topic);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+            while(time < 200){
+                time = time + 1;
+                Thread.sleep(100);
+                log.info("生产者发送消息..."+time);
+                TextMessage textMessage = session.createTextMessage("主题消息生产者一直启动中：" + time);
+                producer.send(textMessage);
+            }
+            //session.commit();
+        } catch (Exception e) {
+//            try {
+//                session.rollback();
+//            } catch (JMSException e1) {
+//                e1.printStackTrace();
+//            }
             e.printStackTrace();
         } finally {
             if (producer != null) {
