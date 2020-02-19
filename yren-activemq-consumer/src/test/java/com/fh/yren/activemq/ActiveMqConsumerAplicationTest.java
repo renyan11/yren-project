@@ -29,7 +29,9 @@ public class ActiveMqConsumerAplicationTest {
         //aplicationTest.consumerTopicTest2();
         //主题消费者们(持久化)
         //aplicationTest.consumerTopicPersistent();
-        aplicationTest.testConsumerRunning();
+        //aplicationTest.testConsumerRunning();
+        //验证AMQ集群故障迁移消费情况
+        aplicationTest.consumerAMQCluster();
 
     }
 
@@ -301,4 +303,53 @@ public class ActiveMqConsumerAplicationTest {
             }
         }
     }
+
+    private void consumerAMQCluster() {
+        String url = "failover:(tcp://101.133.232.101:61616,tcp://101.133.232.101:61617,tcp://101.133.232.101:61618)?randomize=false";
+        ConnectionFactory connectFactory = new ActiveMQConnectionFactory(url);
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue queue = session.createQueue("ren-yan-amq-cluster");
+            consumer = session.createConsumer(queue);
+            consumer.setMessageListener((message -> {
+                TextMessage textMessage = (TextMessage) message;
+                try {
+                    log.info("集群接收到消息 = " + textMessage.getText());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }));
+            //System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }
