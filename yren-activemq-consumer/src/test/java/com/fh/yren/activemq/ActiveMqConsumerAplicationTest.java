@@ -31,8 +31,53 @@ public class ActiveMqConsumerAplicationTest {
         //aplicationTest.consumerTopicPersistent();
         //aplicationTest.testConsumerRunning();
         //验证AMQ集群故障迁移消费情况
-        aplicationTest.consumerAMQCluster();
+        //aplicationTest.consumerAMQCluster();
+        //消费的延迟和定时投递
+        aplicationTest.consumerDelayAndSchedule();
+    }
 
+    private void consumerDelayAndSchedule() {
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue queue = session.createQueue("ren-yan-delay-schedule");
+            consumer = session.createConsumer(queue);
+            log.info("************************");
+            consumer.setMessageListener((message -> {
+                TextMessage textMessage = (TextMessage) message;
+                try {
+                    log.info("接收到消息 = " + textMessage.getText());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }));
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Test

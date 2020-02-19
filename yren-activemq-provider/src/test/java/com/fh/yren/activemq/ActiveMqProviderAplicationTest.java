@@ -2,11 +2,15 @@ package com.fh.yren.activemq;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQMessageProducer;
+import org.apache.activemq.AsyncCallback;
+import org.apache.activemq.ScheduledMessage;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.jms.*;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -24,7 +28,124 @@ public class ActiveMqProviderAplicationTest {
         //aplicationTest.TopicProviderPersistent();
         //aplicationTest.testTopicRunning();
         //AMQ集群故障迁移验证
-        aplicationTest.activemqBatchFailOver();
+        //aplicationTest.activemqBatchFailOver();
+        //AMQ异步投递
+        //aplicationTest.activemqAsyncSend();
+        //延迟和定时投递
+        aplicationTest.delayAndScheduleSend();
+    }
+
+    /**
+     * 延迟投递和定时投递
+     */
+    private void delayAndScheduleSend() {
+        ConnectionFactory connectFactory = new ActiveMQConnectionFactory("tcp://101.133.232.101:61616");
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue queue = session.createQueue("ren-yan-delay-schedule");
+            producer = session.createProducer(queue);
+            //设置参数
+            long delay = 3 * 1000;//延迟时间
+            long period = 4 * 1000;//间隔时间
+            int repeat = 3; // 重复3次
+            for (int i = 0; i < 5; i++) {
+                TextMessage textMessage = session.createTextMessage("延迟、定时队列消息" + i);
+                textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+                textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, period);
+                textMessage.setIntProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, repeat);
+                producer.send(textMessage);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 异步投递
+     */
+    private void activemqAsyncSend() {
+        ActiveMQConnectionFactory connectFactory = new ActiveMQConnectionFactory("tcp://101.133.232.101:61616");
+        //开启异步投递
+        connectFactory.setUseAsyncSend(true);
+        Connection connection = null;
+        Session session = null;
+        ActiveMQMessageProducer activeMQMessageProducer = null;
+        try {
+            connection = connectFactory.createConnection();
+            connection.start();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue queue = session.createQueue("ren-yan-queue-asyncSend");
+            //换成activeMQMessageProducer生产者
+            activeMQMessageProducer = (ActiveMQMessageProducer) session.createProducer(queue);
+            for (int i = 0; i < 5; i++) {
+                TextMessage textMessage = session.createTextMessage("队列异步投递消息" + i);
+                textMessage.setJMSMessageID(UUID.randomUUID().toString()+"------ByYRen");
+                String msgID = textMessage.getJMSMessageID();
+                //异步投递消息需要接受回调
+                activeMQMessageProducer.send(textMessage, new AsyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        log.info(msgID + " message has been send successfully");
+                    }
+
+                    @Override
+                    public void onException(JMSException exception) {
+                        log.info(msgID + "has been send failure");
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (activeMQMessageProducer != null) {
+                try {
+                    activeMQMessageProducer.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
