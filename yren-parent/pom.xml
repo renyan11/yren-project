@@ -20,7 +20,7 @@
         <activemq.pool>5.15.0</activemq.pool>
         <lombok.version>1.18.8</lombok.version>
         <junit.version>4.12</junit.version>
-        <jackson.databind.version>2.9.9</jackson.databind.version>
+        <jackson.databind.version>2.9.10.4</jackson.databind.version>
     </properties>
 
     <dependencies>
